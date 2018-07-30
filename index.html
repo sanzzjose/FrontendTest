@@ -3,9 +3,263 @@
 <head lang="en">
     <meta charset="UTF-8">
     <title>Hello!</title>
+    <style>
+
+body {
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: rgb(240, 240, 240);
+}
+
+.main {
+  	position: relative;
+    display: block;
+    width: 50%;
+    height: 100%;
+    margin: 100px auto 0;
+    box-shadow: 5px 5px  rgba(75, 75, 75, 0.2);
+    overflow: hidden;
+    border-radius: 8px;
+    background: white;
+    text-align: center;
+    padding: 3%;
+}
+
+
+.search-pan input[type=text] {
+	width: 75%;
+  	margin-top: 8px;
+  	margin-right: 2%;
+  	font-size: 17px;
+    box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: white;
+    padding: 12px 20px 12px 40px;
+}
+
+.search-pan button {
+	width: 15%;
+  	margin-top: 8px;
+  	font-size: 17px;
+  	background: rgb(246, 248, 251, 0.2);
+  	box-sizing: border-box;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    padding: 12px  12px;
+    font-weight: bold;
+}
+
+
+
+#logoimg{
+	border-radius: 4px;
+	width: 20%;
+	height: 20%;
+	position: relative;
+	float: left;
+	margin-right: 5%;
+}
+
+#info{
+	text-align: justify;
+}
+
+#information{
+	display: grid;
+	margin-top: 5%;
+	padding: 12px 20px 12px 40px;
+}
+
+#repositorios{
+	margin-top: 4%;
+	display: inline;
+}
+
+#title{
+	float: left;
+	font-weight:bold;
+	
+}
+
+#hrfirst{
+	border: none;
+    height: 1px;
+    opacity: 0.25;
+    color: #333; 
+    background-color: #333;
+}
+
+.reposlist{
+	float: left;
+	text-align: left;
+	font-weight: bold;
+}
+
+.hrlist{
+	border: none;
+    height: 1px;
+    opacity: 0.25;
+    color: #333; 
+    background-color: #333;
+}
+
+.fork{
+	float:right;
+}
+
+.star{
+	float:right;
+}
+
+#error{
+	width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    background-color: rgb(255, 173, 164);
+    padding: 12px 80% 12px 0%;
+
+
+}
+
+}
+</style>
+<script type="text/javascript">
+	const client_id="Iv1.b3acaf6585cb8d61";
+	const client_secret="4f8f5da6db54d538d5d3b5b454cc7cdca1f0b02a";
+
+	const fetchUsers= async(user)=>{
+			const api_call = await fetch(`https://api.github.com/users/${user}?client_id=${client_id}&client_secret=${client_secret}`);
+	const data=await api_call.json();
+	return {data:data}
+	};
+
+	const fetchRepos= async(user)=>{
+			const api_call = await fetch(`https://api.github.com/users/${user}/repos?client_id=${client_id}&client_secret=${client_secret}`);
+	const data=await api_call.json();
+	return {data:data}
+	};
+
+	const showData=()=>{
+		fetchUsers(document.getElementById("username").value).then((res)=>{
+			console.log(res.data);
+			if(res.data.message=="Not Found"){
+				var error=document.createElement('span');
+				error.setAttribute('id','error');
+				var text=document.createTextNode('Does not exist');
+				error.appendChild(text);
+				document.getElementById("user-info").appendChild(error);
+			}else{
+				var logo=document.createElement('div');
+				logo.setAttribute('id','logo');
+				var info=document.createElement('div');
+				info.setAttribute('id','info');
+
+				var login=document.createElement('span');
+				login.setAttribute('id','usernamegit');
+				var nombre=document.createElement('h2');
+				nombre.setAttribute('id','usernamecomplete');
+				var bio=document.createElement('span');
+				bio.setAttribute('id','userbio');
+
+				var userinfo=document.getElementById('user-info');
+				userinfo.appendChild(logo);
+				userinfo.appendChild(info);
+
+				info.appendChild(login);
+				info.appendChild(nombre);
+				info.appendChild(bio);
+
+				document.getElementById("logo").innerHTML=`<img id="logoimg" src="${res.data.avatar_url}">`;
+				document.getElementById("usernamegit").innerHTML=`<span>@${res.data.login}</span>`;
+				document.getElementById("usernamecomplete").innerHTML=`${res.data.name}`;
+				document.getElementById("userbio").innerHTML=`${res.data.bio}`;
+				
+				var num_repos=res.data.public_repos;
+				console.log(num_repos);
+				
+				fetchRepos(document.getElementById("username").value).then((res)=>{
+				console.log(res.data);
+
+				var titulorepos=document.createElement('span');
+				titulorepos.setAttribute('id','title');
+				var textrepos=document.createTextNode('Repositories');
+				titulorepos.appendChild(textrepos);
+				document.getElementById('repositorios').appendChild(titulorepos);
+				var linea=document.createElement('hr');
+				var salto=document.createElement('br');
+				linea.setAttribute('id','hrfirst');
+				document.getElementById('repositorios').appendChild(salto);
+				document.getElementById('repositorios').appendChild(linea);
+
+				for(var i=0;i<num_repos;i++){
+					console.log(res.data[i].name);
+					var span=document.createElement("span");
+					span.setAttribute('class','reposlist');
+					var node=document.createTextNode(res.data[i].name);
+					span.appendChild(node);
+					var repos=document.getElementById('repositorios');
+					repos.appendChild(span);
+
+					var forksym=document.createElement('span');
+					forksym.setAttribute('class','fork');
+					var starsym=document.createElement('span');
+					starsym.setAttribute('class','star');
+
+					var fork=document.createTextNode(res.data[i].forks);
+					var star=document.createTextNode(res.data[i].stargazers_count);
+
+					forksym.appendChild(fork);
+					starsym.appendChild(star);
+
+					repos.appendChild(forksym);
+					repos.appendChild(starsym);
+
+					var hr=document.createElement('hr');
+					hr.setAttribute('class','hrlist');
+					var br=document.createElement('br');
+					repos.appendChild(br);
+					repos.appendChild(hr);
+				}
+				})	
+			}
+
+			
+		})
+
+		
+	};
+</script>
 </head>
 <body>
-
-<h1>Hello!</h1>
+	<script type="text/javascript">
+	document.addEventListener("DOMContentLoaded", function(event) { 
+  	document.getElementById("searchButton").addEventListener("click",function(){
+  			var userinfo=document.getElementById("user-info")
+  			var userrepos=document.getElementById("repositorios")
+	        while(userinfo.firstChild){
+	            userinfo.removeChild(userinfo.firstChild);
+	        }
+	        while(userrepos.firstChild){
+	            userrepos.removeChild(userrepos.firstChild);
+	        }
+			showData();
+		});
+	});
+		
+	</script>
+	<div class="main">
+		<div class="search-pan">
+		  	<input id="username" type="text" placeholder="Search username..">
+		  	<button id="searchButton">Search</button>
+		</div>
+		<div id="information">
+			<div class="user-info" id="user-info">	</div>
+			
+			<div class="user-repos" id="repositorios"></div>
+		</div>
+	</div>
 </body>
 </html>
